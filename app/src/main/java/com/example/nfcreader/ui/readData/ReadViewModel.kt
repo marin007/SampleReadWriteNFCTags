@@ -15,5 +15,4 @@ class ReadViewModel : ViewModel() {
     fun setTagMessage(message: String) {
         _tag.value = message
     }
-
 }

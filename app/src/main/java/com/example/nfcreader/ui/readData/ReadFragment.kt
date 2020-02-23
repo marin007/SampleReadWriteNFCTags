@@ -13,28 +13,20 @@ import com.example.nfcreader.databinding.FragmentReadBinding
 class ReadFragment : Fragment() {
 
     private val readViewModel: ReadViewModel by activityViewModels()
-    //private lateinit var readViewModel: ReadViewModel
+
     private var _binding: FragmentReadBinding? = null
-    // This property is only valid between onCreateView and
-    // onDestroyView.
+
     private val binding get() = _binding!!
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-//        readViewModel =
-//            ViewModelProvider(this).get(ReadViewModel::class.java)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         _binding = FragmentReadBinding.inflate(inflater, container, false)
         val view = binding.root
-
         val textView: TextView = binding.textRead
-        readViewModel.tag.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
+        readViewModel.tag.observe(viewLifecycleOwner, Observer { textView.text = it })
         return view
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

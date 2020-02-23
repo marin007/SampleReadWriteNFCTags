@@ -20,47 +20,51 @@ import com.example.nfcreader.ui.readData.ReadViewModel
 class WriteFragment : Fragment() {
 
     private val writeViewModel: WriteViewModel by activityViewModels()
-    //private lateinit var writeViewModel: WriteViewModel
+
     private var _binding: FragmentWriteBinding? = null
-    // This property is only valid between onCreateView and
-// onDestroyView.
+
     private val binding get() = _binding!!
 
     private var dialog: Dialog? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-//        writeViewModel =
-//            ViewModelProvider(this).get(WriteViewModel::class.java)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         _binding = FragmentWriteBinding.inflate(inflater, container, false)
-        val view = binding.root
-        val textView: TextView = binding.textWrite
+        initUi()
+        startObservers()
+        return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun initUi() {
         binding.saveTagButtonWrapper.setOnClickListener()  {
             showDialog()
             writeViewModel.messageToSave = binding.messageToSave.text!!.toString()
             writeViewModel.isWriteTagOptionOn = true
         }
+    }
+
+    private fun startObservers() {
+        val textView: TextView = binding.textWrite
+
         writeViewModel.text.observe(viewLifecycleOwner, Observer {
             textView.text = it
         })
         writeViewModel.closeDialog.observe(viewLifecycleOwner, Observer {
-            if(it && dialog?.isShowing != null){
-                dialog!!.dismiss()
+            if(it && dialog?.isShowing == true){
+                dialog?.dismiss()
             }
         })
-        return view
     }
+
     private fun showDialog() {
-        dialog = Dialog(activity)
-        dialog!!.setCancelable(true)
-        dialog!!.setContentView(R.layout.dialog_write_tag)
-        dialog!!.show()
-    }
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        dialog = Dialog(context!!)
+        dialog?.setCancelable(true)
+        dialog?.setContentView(R.layout.dialog_write_tag)
+        dialog?.show()
     }
 }

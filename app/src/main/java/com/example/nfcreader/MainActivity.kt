@@ -3,13 +3,12 @@ package com.example.nfcreader
 import android.app.PendingIntent
 import android.content.Intent
 import android.nfc.NdefMessage
-import android.nfc.NdefRecord
 import android.nfc.NfcAdapter
-import android.nfc.Tag
-import android.nfc.tech.Ndef
-import android.nfc.tech.NdefFormatable
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -24,24 +23,27 @@ import com.example.nfcreader.ui.readData.ReadViewModel
 import com.example.nfcreader.ui.writeData.WriteViewModel
 import com.example.nfcreader.utils.NFCUtilManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import java.io.IOException
-
 
 class MainActivity : AppCompatActivity(), LifecycleOwner {
 
     private lateinit var lifeCycleRegistry : LifecycleRegistry
-    private var mPendingIntent: PendingIntent? = null
+
     private lateinit var readViewModel: ReadViewModel
     private lateinit var writeViewModel: WriteViewModel
+
+    private var nfcAdapter: NfcAdapter? = null
+
+    private var pendingIntent: PendingIntent? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        readViewModel =
-            ViewModelProvider(this).get(ReadViewModel::class.java)
-        writeViewModel =
-            ViewModelProvider(this).get(WriteViewModel::class.java)
+
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+        readViewModel = ViewModelProvider(this).get(ReadViewModel::class.java)
+        writeViewModel = ViewModelProvider(this).get(WriteViewModel::class.java)
         lifeCycleRegistry = LifecycleRegistry(this)
         lifeCycleRegistry.markState(Lifecycle.State.CREATED)
 
@@ -57,40 +59,35 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
-        mPendingIntent = PendingIntent.getActivity(
+        pendingIntent = PendingIntent.getActivity(
             this, 0, Intent(this, javaClass)
                 .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0
         )
-
     }
+
     override fun onResume() {
         super.onResume()
         lifeCycleRegistry.markState(Lifecycle.State.RESUMED)
-        val nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        // check if device support NFC
-        if(NFCUtilManager.checkIfNFCIsAvailable(nfcAdapter)){
-            //if support check if NFC is turned on
-            if(NFCUtilManager.checkIfNFCEnabled(nfcAdapter)){
-                nfcAdapter.enableForegroundDispatch(this, mPendingIntent, null, null)
-                //nfcAdapter.setNdefPushMessageCallback(this, this)
-
-            } else {
-                showToastMessage("NFC is disabled. Please turn on to proceed")
-            }
-        } else {
-            showToastMessage("NFC not available for your device")
-        }
+        enableNfc()
     }
+
+    override fun onPause() {
+        super.onPause()
+        nfcAdapter?.disableForegroundDispatch(this)
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        if(writeViewModel?.isWriteTagOptionOn){
+
+        if (writeViewModel?.isWriteTagOptionOn) {
             val messageWrittenSuccessfully = NFCUtilManager.createNFCMessage(writeViewModel?.messageToSave, intent)
             writeViewModel?.isWriteTagOptionOn = false
             writeViewModel?._closeDialog.value = true
-            if(messageWrittenSuccessfully){
-                showToastMessage("Message has been saved successfully")
+
+            if (messageWrittenSuccessfully){
+                showToast("Message has been saved successfully")
             } else {
-                showToastMessage("Failed to save message. Please try again")
+                showToast("Failed to save message. Please try again")
             }
         } else {
             if(NfcAdapter.ACTION_NDEF_DISCOVERED == intent.action){
@@ -108,12 +105,20 @@ class MainActivity : AppCompatActivity(), LifecycleOwner {
         }
     }
 
-    private fun showToastMessage(message: String){
-        Toast.makeText(
-            this,
-            message,
-            Toast.LENGTH_SHORT
-        ).show()
+    private fun initUi() {
+
     }
 
+    private fun enableNfc() {
+         if (nfcAdapter?.isEnabled == true) {
+            nfcAdapter?.enableForegroundDispatch(this, pendingIntent, null, null)
+        } else {
+             startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
+             showToast("Please enable NFC in Settings")
+         }
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
 }
