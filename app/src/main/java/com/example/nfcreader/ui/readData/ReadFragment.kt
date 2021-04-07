@@ -19,7 +19,7 @@ class ReadFragment : Fragment() {
     private val binding get() = _binding!!
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         _binding = FragmentReadBinding.inflate(inflater, container, false)
         val view = binding.root
         val textView: TextView = binding.textRead

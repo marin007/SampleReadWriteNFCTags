@@ -5,17 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.widget.TextView
-import android.widget.Toast
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.example.nfcreader.R
 import com.example.nfcreader.databinding.FragmentWriteBinding
-import com.example.nfcreader.ui.readData.ReadViewModel
 
 class WriteFragment : Fragment() {
 
@@ -25,10 +20,10 @@ class WriteFragment : Fragment() {
 
     private val binding get() = _binding!!
 
-    private var dialog: Dialog? = null
+    private lateinit var dialog: Dialog
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         _binding = FragmentWriteBinding.inflate(inflater, container, false)
         initUi()
         startObservers()
@@ -41,7 +36,7 @@ class WriteFragment : Fragment() {
     }
 
     private fun initUi() {
-        binding.saveTagButtonWrapper.setOnClickListener()  {
+        binding.saveTagButtonWrapper.setOnClickListener  {
             showDialog()
             writeViewModel.messageToSave = binding.messageToSave.text!!.toString()
             writeViewModel.isWriteTagOptionOn = true
