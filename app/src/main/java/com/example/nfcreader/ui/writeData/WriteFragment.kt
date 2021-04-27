@@ -16,9 +16,9 @@ class WriteFragment : Fragment() {
 
     private val writeViewModel: WriteViewModel by activityViewModels()
 
-    private var _binding: FragmentWriteBinding? = null
+    private lateinit var _binding: FragmentWriteBinding
 
-    private val binding get() = _binding!!
+    private val binding get() = _binding
 
     private lateinit var dialog: Dialog
 
@@ -30,12 +30,11 @@ class WriteFragment : Fragment() {
         return binding.root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
     private fun initUi() {
+        context?.let {
+            dialog = Dialog(it)
+        } ?: throw IllegalStateException("Context cannot be null")
+
         binding.saveTagButtonWrapper.setOnClickListener  {
             showDialog()
             writeViewModel.messageToSave = binding.messageToSave.text!!.toString()
@@ -50,16 +49,15 @@ class WriteFragment : Fragment() {
             textView.text = it
         })
         writeViewModel.closeDialog.observe(viewLifecycleOwner, Observer {
-            if(it && dialog?.isShowing == true){
-                dialog?.dismiss()
+            if(it && dialog.isShowing == true){
+                dialog.dismiss()
             }
         })
     }
 
     private fun showDialog() {
-        dialog = Dialog(context!!)
-        dialog?.setCancelable(true)
-        dialog?.setContentView(R.layout.dialog_write_tag)
-        dialog?.show()
+        dialog.setCancelable(true)
+        dialog.setContentView(R.layout.dialog_write_tag)
+        dialog.show()
     }
 }

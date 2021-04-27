@@ -14,9 +14,9 @@ class ReadFragment : Fragment() {
 
     private val readViewModel: ReadViewModel by activityViewModels()
 
-    private var _binding: FragmentReadBinding? = null
+    private lateinit var _binding: FragmentReadBinding
 
-    private val binding get() = _binding!!
+    private val binding get() = _binding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -25,10 +25,5 @@ class ReadFragment : Fragment() {
         val textView: TextView = binding.textRead
         readViewModel.tag.observe(viewLifecycleOwner, Observer { textView.text = it })
         return view
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 }

@@ -7,18 +7,19 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
-import java.io.IOException
 
 object NFCUtilManager {
 
-    fun createNFCMessage(payload: String, intent: Intent?) : Boolean {
+    fun createNFCMessage(payload: String, intent: Intent?): Boolean {
         val pathPrefix = "com.example.nfcreader"
-        val nfcRecord = NdefRecord(NdefRecord.TNF_EXTERNAL_TYPE, pathPrefix.toByteArray(),
-            ByteArray(0), payload.toByteArray())
+        val nfcRecord = NdefRecord(
+            NdefRecord.TNF_EXTERNAL_TYPE, pathPrefix.toByteArray(),
+            ByteArray(0), payload.toByteArray()
+        )
         val nfcMessage = NdefMessage(arrayOf(nfcRecord))
         intent?.let {
             val tag = it.getParcelableExtra<Tag>(NfcAdapter.EXTRA_TAG)
-            return  writeMessageToTag(nfcMessage, tag)
+            return writeMessageToTag(nfcMessage, tag)
         }
         return false
     }
@@ -37,10 +38,10 @@ object NFCUtilManager {
             }
 
             NdefFormatable.get(tag)?.let {
-                    it.connect()
-                    it.format(nfcMessage)
-                    it.close()
-                    true
+                it.connect()
+                it.format(nfcMessage)
+                it.close()
+                true
 
             }
             return false
